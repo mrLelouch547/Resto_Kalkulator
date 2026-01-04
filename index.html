@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Валутен Ресто Калкулатор</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        background: #f0f2f5;
+      }
+      .card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+      }
+      h2 {
+        text-align: center;
+        color: #1a73e8;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-top: 15px;
+        font-weight: 600;
+        color: #555;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        margin-top: 5px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+      input:focus {
+        border-color: #1a73e8;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+      }
+
+      .btn-clear {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 8px;
+        background-color: #6c757d;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .btn-clear:hover {
+        background-color: #5a6268;
+      }
+
+      .result {
+        margin-top: 25px;
+        padding: 15px;
+        background: #e8f0fe;
+        border-left: 5px solid #1a73e8;
+        border-radius: 4px;
+      }
+      .result p {
+        margin: 8px 0;
+        font-size: 1.1em;
+        color: #333;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid #eee;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>💰 Ресто Калкулатор</h2>
+
+      <label>Сума на сметката:</label>
+      <input type="number" id="billAmount" placeholder="0.00" step="0.01" />
+
+      <label>Валута на сметката:</label>
+      <select id="billCurrency">
+        <option value="BGN">BGN (лв)</option>
+        <option value="EUR">EUR (€)</option>
+      </select>
+
+      <hr />
+
+      <label>Платено от клиента:</label>
+      <input type="number" id="paidAmount" placeholder="0.00" step="0.01" />
+
+      <label>Валута на плащане:</label>
+      <select id="paidCurrency">
+        <option value="BGN">BGN (лв)</option>
+        <option value="EUR">EUR (€)</option>
+      </select>
+
+      <div class="result" id="output" style="display: none">
+        <strong>Дължимо ресто:</strong>
+        <p id="changeBGN"></p>
+        <p id="changeEUR"></p>
+      </div>
+
+      <button class="btn-clear" onclick="clearFields()">Изчисти всичко</button>
+    </div>
+
+    <script>
+      const RATE = 1.95583;
+      const inputIds = [
+        "billAmount",
+        "billCurrency",
+        "paidAmount",
+        "paidCurrency",
+      ];
+
+      // Слушател за промяна във всяко поле
+      inputIds.forEach((id) => {
+        document.getElementById(id).addEventListener("input", calculateChange);
+      });
+
+      function calculateChange() {
+        const bill = parseFloat(document.getElementById("billAmount").value);
+        const billCurr = document.getElementById("billCurrency").value;
+        const paid = parseFloat(document.getElementById("paidAmount").value);
+        const paidCurr = document.getElementById("paidCurrency").value;
+
+        const outputDiv = document.getElementById("output");
+
+        if (isNaN(bill) || isNaN(paid)) {
+          outputDiv.style.display = "none";
+          return;
+        }
+
+        // Конвертиране към BGN
+        let billInBGN = billCurr === "EUR" ? bill * RATE : bill;
+        let paidInBGN = paidCurr === "EUR" ? paid * RATE : paid;
+
+        let changeInBGN = paidInBGN - billInBGN;
+
+        outputDiv.style.display = "block";
+
+        if (changeInBGN < 0) {
+          document.getElementById("changeBGN").innerHTML =
+            "<span style='color:red;'>Недостатъчна сума!</span>";
+          document.getElementById("changeEUR").innerText = "";
+          return;
+        }
+
+        let changeInEUR = changeInBGN / RATE;
+
+        document.getElementById(
+          "changeBGN"
+        ).innerHTML = `В лева: <strong>${changeInBGN.toFixed(2)} лв.</strong>`;
+        document.getElementById(
+          "changeEUR"
+        ).innerHTML = `В евро: <strong>${changeInEUR.toFixed(2)} €</strong>`;
+      }
+
+      function clearFields() {
+        document.getElementById("billAmount").value = "";
+        document.getElementById("paidAmount").value = "";
+        document.getElementById("billCurrency").value = "BGN";
+        document.getElementById("paidCurrency").value = "BGN";
+        document.getElementById("output").style.display = "none";
+      }
+    </script>
+  </body>
+</html>
